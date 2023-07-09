@@ -1,0 +1,33 @@
+version: "3"
+services:
+  node-service:
+    container_name: node-service
+    build: .
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/usr/src/app
+      - ./wait-for-it.sh:/usr/src/app/wait-for-it.sh  # wait-for-it.sh를 컨테이너에 복사
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=gggjjj
+      - DB_PASSWORD=ggggjjjj
+      - DB_NAME=mydb
+      - DB_PORT=3306
+    command: ["/usr/src/app/wait-for-it.sh", "backend-db-1:3306", "--", "npm", "run", "dev"]  # MySQL 서비스가 시작될 때까지 기다림
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ggggjjjj
+      MYSQL_USER: gggjjj
+      MYSQL_PASSWORD: ggggjjjj
+      MYSQL_DATABASE: mydb
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+volumes:
+  db-data:
