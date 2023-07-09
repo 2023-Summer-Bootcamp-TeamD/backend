@@ -8,6 +8,7 @@ services:
       - 8080:8080
     volumes:
       - .:/usr/src/app
+<<<<<<< HEAD
       - ./wait-for-it.sh:/usr/src/app/wait-for-it.sh
     depends_on:
       - db
@@ -22,6 +23,25 @@ services:
     image: mysql:8.0
     env_file:
       - .env
+=======
+      - ./wait-for-it.sh:/usr/src/app/wait-for-it.sh  # wait-for-it.sh를 컨테이너에 복사
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=gggjjj
+      - DB_PASSWORD=ggggjjjj
+      - DB_NAME=mydb
+      - DB_PORT=3306
+    command: ["/usr/src/app/wait-for-it.sh", "backend-db-1:3306", "--", "npm", "run", "dev"]  # MySQL 서비스가 시작될 때까지 기다림
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ggggjjjj
+      MYSQL_USER: gggjjj
+      MYSQL_PASSWORD: ggggjjjj
+      MYSQL_DATABASE: mydb
+>>>>>>> 75427859fd8e4d79be9f645a6cbeb81d033cb4e2
     volumes:
       - db-data:/var/lib/mysql
     ports:
