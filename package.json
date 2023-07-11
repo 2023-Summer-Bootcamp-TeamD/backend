@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --delay 1 --exec babel-node ./app.js",
     "dev": "nodemon --experimental-modules --delay 1 --exec babel-node ./app.js",
-    "lint": "./node_modules/.bin/eslint .",
+    "lint": "eslint .",
     "test": "./node_modules/.bin/jest --verbose ./tests"
   },
   "keywords": [],
