@@ -1,16 +1,14 @@
 env:
-  jest: true # Jest 글로벌
+  jest: true
 
 parserOptions:
-  ecmaVersion: 2020 # ES2020 문법을 사용하도록 설정
-  sourceType: module # `import`와 `export`를 사용할 수 있도록 설정
+  ecmaVersion: 2020
+  sourceType: module
 
 plugins:
-  - jest # Jest 테스트를 위해 플러그인이 필요하다.
-  - dotenv # dotenv 플러그인 추가
+  - jest
 
 rules:
-  #...
   jest/no-disabled-tests:
     - warn
   jest/no-focused-tests:
