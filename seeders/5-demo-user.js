@@ -4,7 +4,7 @@ const { queryInterface, Sequelize } = require('sequelize');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('Users', [
+    await queryInterface.bulkInsert('Users', [
       {round_id: null, room_id: 1, nickname: "노드노드다", score: 0, is_host: 1, createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {round_id: null, room_id: 1, nickname: "nodes", score: 0, is_host: 0, createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {round_id: null, room_id: 1, nickname: "안녕하세요", score: 0, is_host: 0, createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
