@@ -1,38 +1,22 @@
 require('@babel/register');
 import express from 'express';
-import mysql from 'mysql2';
-import dotenv from 'dotenv';
+import cors from 'cors';
 
-dotenv.config();
+import imageUpload from "./routes/imageUpload";
+import roundStart from "./routes/roundStart";
 
 const app = express();
 const port = 8080;
 
+app.use(cors());
 app.use(express.json());
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
-});
+app.get("/", (req, res) => {
+  console.log("hello");
+}); 
 
-db.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log("Connected to the MySQL server.");
-});
-
-app.get("/users", (req, res) => {
-  db.query("SELECT * FROM Users", (err, result) => {
-    if (err) {
-      res.send({ error: err });
-    } else {
-      res.send({ users: result });
-    }
-  });
-});
+app.use('/', imageUpload);
+app.use('/', roundStart);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
