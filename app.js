@@ -2,6 +2,9 @@ require('@babel/register');
 import express from 'express';
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import createRouter from './routes/createrooms'; // 사용자 방만들기
+
 
 dotenv.config();
 
@@ -9,6 +12,7 @@ const app = express();
 const port = 8080;
 
 app.use(express.json());
+app.use(cors());
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -33,6 +37,11 @@ app.get("/users", (req, res) => {
     }
   });
 });
+
+const roomsRouter = createRouter(db);
+app.use(roomsRouter); // 사용자 방만들기
+
+
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
