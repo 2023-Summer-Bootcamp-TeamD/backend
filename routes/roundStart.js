@@ -28,7 +28,7 @@ db.connect((err) => {
 const usedNicknames = [];
 
 /* 라운드 별 게임 시작 API - room_id, 남은 시간(제한시간), 단어, 그리는 사람의 닉네임 get 요청을 통해 가져온다. */
-router.get('/api/v1/rooms/:room_id/rounds/:round_id', async (req, res) => {
+router.get('/api/v1/rooms/:room_id/rounds', async (req, res) => {
     try {
         // room_id가 1번이라고 가정
         const room_id = req.params.room_id;
