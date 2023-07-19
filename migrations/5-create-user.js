@@ -9,15 +9,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      round_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Rounds',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
       room_id: {
         type: Sequelize.INTEGER,
         references: {
