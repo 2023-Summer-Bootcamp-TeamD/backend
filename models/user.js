@@ -1,19 +1,19 @@
 'use strict';
 const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
+      // define association here
       User.belongsTo(models.Room, { foreignKey: 'room_id' });
-      User.belongsTo(models.Round, { foreignKey: 'round_id' });
     }
-    
   }
   User.init({
-    round_id: DataTypes.INTEGER,
-    room_id: DataTypes.INTEGER,
+    round_id: { type: DataTypes.INTEGER  },
+    room_id: { type: DataTypes.INTEGER },
     nickname: DataTypes.STRING,
-    score: DataTypes.INTEGER,
-    is_host: DataTypes.BOOLEAN
+    score: { type: DataTypes.INTEGER, defaultValue: 0 },
+    is_host: { type: DataTypes.BOOLEAN, defaultValue: false }
   }, {
     sequelize,
     modelName: 'User',

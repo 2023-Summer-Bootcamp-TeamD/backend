@@ -8,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
       Category.hasMany(models.Word, { foreignKey: 'category_id' });
       Category.hasMany(models.Rooms, { foreignKey: 'category_id' });
     }
-    
   }
   Category.init({
     category: DataTypes.STRING
