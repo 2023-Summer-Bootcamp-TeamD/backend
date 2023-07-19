@@ -1,16 +1,11 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Round extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // define association here
+      Round.belongsTo(models.Room, { foreignKey: 'room_id' });
+      Round.hasOne(models.User, { foreignKey: 'round_id' });
+      Round.belongsTo(models.Word, { foreignKey: 'word_id' });
     }
   }
   Round.init({
