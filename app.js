@@ -9,6 +9,8 @@ import { Server } from 'socket.io';
 import chat from './sockets/chat';
 import imageUpload from "./routes/imageUpload";
 import roundStart from "./routes/roundStart";
+import joinRoomRouter from './routes/joinroom'; // 사용자 입장하기 
+
 
 const app = express();
 const port = 8080;
@@ -46,6 +48,9 @@ chat(io);
 
 const roomsRouter = createRouter(db);
 app.use(roomsRouter); // 사용자 방만들기
+
+const joinRouter = joinRoomRouter(db);
+app.use(joinRouter); // 사용자 입장하기 
 
 server.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
