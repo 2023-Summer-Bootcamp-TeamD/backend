@@ -2,7 +2,7 @@
 const { queryInterface, Sequelize } = require('sequelize');
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('Words', [
+    await queryInterface.bulkInsert('Words', [
       {category_id: 1, word: "사과", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 1, word: "바나나", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 1, word: "아이스크림", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
