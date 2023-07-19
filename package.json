@@ -19,7 +19,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.5.0",
     "sequelize": "^6.32.1",
-    "uuid": "^9.0.0",
+    "uuid": "^9.0.0",  
   },
   "devDependencies": {
     "@babel/cli": "^7.22.6",
