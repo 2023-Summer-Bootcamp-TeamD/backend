@@ -7,14 +7,18 @@ import createRouter from './routes/createrooms'; // 사용자 방만들기
 import http from 'http';
 import { Server } from 'socket.io';
 import chat from './sockets/chat';
-
-dotenv.config();
+import imageUpload from "./routes/imageUpload";
+import roundStart from "./routes/roundStart";
 
 const app = express();
 const port = 8080;
 
+app.use(cors());
 app.use(express.json());
 app.use(cors());
+
+app.use('/', imageUpload);
+app.use('/', roundStart);
 
 // db 연결
 const db = mysql.createConnection({
@@ -39,16 +43,6 @@ const io = new Server(server);
 
 // chat.js 미들웨어
 chat(io);
-
-app.get("/users", (req, res) => {
-  db.query("SELECT * FROM Users", (err, result) => {
-    if (err) {
-      res.send({ error: err });
-    } else {
-      res.send({ users: result });
-    }
-  });
-});
 
 const roomsRouter = createRouter(db);
 app.use(roomsRouter); // 사용자 방만들기
