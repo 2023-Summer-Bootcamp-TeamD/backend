@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -11,15 +12,21 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.belongsTo(models.Room, { foreignKey: 'room_id' });
+      User.belongsTo(models.Round, { foreignKey: 'round_id' });
     }
+
   }
   User.init({
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    email: DataTypes.STRING
+    round_id: { type: DataTypes.INTEGER  },
+    room_id: { type: DataTypes.INTEGER },
+    nickname: DataTypes.STRING,
+    score: { type: DataTypes.INTEGER, defaultValue: 0 },
+    is_host: { type: DataTypes.BOOLEAN, defaultValue: false }
   }, {
     sequelize,
     modelName: 'User',
+    timestamps: true,
   });
   return User;
 };
