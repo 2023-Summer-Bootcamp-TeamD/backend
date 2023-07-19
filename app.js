@@ -4,7 +4,7 @@ import mysql from 'mysql2';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import createRouter from './routes/createrooms'; // 사용자 방만들기
-
+import joinRoomRouter from './routes/joinroom'; // 사용자 입장하기 
 
 dotenv.config();
 
@@ -41,7 +41,8 @@ app.get("/users", (req, res) => {
 const roomsRouter = createRouter(db);
 app.use(roomsRouter); // 사용자 방만들기
 
-
+const joinRouter = joinRoomRouter(db);
+app.use(joinRouter); // 사용자 입장하기 
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
