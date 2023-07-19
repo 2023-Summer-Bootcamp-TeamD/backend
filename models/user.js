@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       User.belongsTo(models.Room, { foreignKey: 'room_id' });
-      User.belongsTo(models.Round, { foreignKey: 'round_id' });
     }
 
   }
