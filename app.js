@@ -3,13 +3,13 @@ import express from 'express';
 import mysql from 'mysql2';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import createRouter from './routes/createrooms'; // 사용자 방만들기
+import createRouter from './routes/createRooms'; // 사용자 방만들기
 import http from 'http';
 import { Server } from 'socket.io';
 import chat from './sockets/chat';
 import imageUpload from "./routes/imageUpload";
 import roundStart from "./routes/roundStart";
-import joinRoomRouter from './routes/joinroom'; // 사용자 입장하기 
+import joinRoomRouter from './routes/joinRoom'; // 사용자 입장하기 
 
 
 const app = express();
