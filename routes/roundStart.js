@@ -20,14 +20,14 @@ db.connect((err) => {
     if (err) {
         throw err;
     }
-    console.log("Connected to the MySQL server.");
 });
 
-/* 게임 라운드별 그림 API - 매 라운드마다 출제자가 그린 그림을 S3에 저장한다. */
+
+/* 라운드 별 게임 시작 API - room_id, 남은 시간(제한시간), 단어, 그리는 사람의 닉네임 get 요청을 통해 가져온다. */
+
 // 뽑힌 닉네임을 저장하는 전역 배열 변수
 const usedNicknames = [];
 
-/* 라운드 별 게임 시작 API - room_id, 남은 시간(제한시간), 단어, 그리는 사람의 닉네임 get 요청을 통해 가져온다. */
 router.get('/api/v1/rooms/:room_id/rounds', async (req, res) => {
     try {
         // room_id가 1번이라고 가정
