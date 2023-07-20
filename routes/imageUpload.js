@@ -22,10 +22,9 @@ db.connect((err) => {
   if (err) {
     throw err;
   }
-  console.log("Connected to the MySQL server.");
 });
 
-/* 게임 라운드별 그림 API - 매 라운드마다 출제자가 그린 그림을 S3에 저장한다. */
+/* 게임 라운드별 그림 저장 API - 매 라운드마다 출제자가 그린 그림을 S3에 저장한다. */
 
 // 환경변수 설정
 const YOUR_S3_BUCKET_NAME = process.env.BUCKET_NAME;
@@ -44,9 +43,10 @@ const s3 = new aws.S3({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.post('/api/v1/rooms/rounds', upload.single('image'), (req, res) => {
+router.post('/api/v1/rooms/:room_id/rounds', upload.single('image'), (req, res) => {
   const file = req.file;
   const fileContent = file.buffer;
+  const room_id = req.params.room_id;
 
   // S3에 이미지 업로드
   const params = {
@@ -68,8 +68,8 @@ router.post('/api/v1/rooms/rounds', upload.single('image'), (req, res) => {
     const picture_url = data.Location;
     console.log(picture_url);
     // 1번 게임방, word_id가 1 이라고 가정
-    const sql = `UPDATE Rounds AS r1 JOIN ( SELECT MIN(id) AS min_id   FROM Rounds   WHERE room_id = 1 AND picture_url IS NULL ) 
-      AS r2 ON r1.id = r2.min_id SET r1.picture_url = '${picture_url}' WHERE r1.room_id = 1 AND r1.picture_url IS NULL;`;
+    const sql = `UPDATE Rounds AS r1 JOIN ( SELECT MIN(id) AS min_id   FROM Rounds   WHERE room_id = ${room_id} AND picture_url IS NULL ) 
+      AS r2 ON r1.id = r2.min_id SET r1.picture_url = '${picture_url}' WHERE r1.room_id = ${room_id} AND r1.picture_url IS NULL;`;
     db.query(sql, (err, result) => {
       if (err) {
         console.log(err);
