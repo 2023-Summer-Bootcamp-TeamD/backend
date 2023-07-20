@@ -15,9 +15,11 @@ import joinRoomRouter from './routes/joinroom'; // 사용자 입장하기
 const app = express();
 const port = 8080;
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
 app.use(express.json());
-app.use(cors());
 
 app.use('/', imageUpload);
 app.use('/', roundStart);
