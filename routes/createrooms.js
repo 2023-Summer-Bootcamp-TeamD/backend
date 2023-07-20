@@ -66,7 +66,7 @@ const createRouter = (db) => {
                                                         }
 
                                                         // 생성된 UUID, 방 정보, 사용자를 클라이언트에 전송
-                                                        res.status(201).send({ room, user });
+                                                        res.status(201).send({ uuid: room.uuid, score: user.score });
                                                     });
                                                 }
                                             }

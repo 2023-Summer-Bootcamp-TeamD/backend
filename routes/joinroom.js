@@ -8,14 +8,14 @@ const joinRoomRouter = (db) => {
         const { UUID } = req.params;
         const { nickname } = req.body;
 
-        // 트랜잭션 시작
+        // Begin transaction
         db.beginTransaction(err => {
             if (err) {
                 res.status(422).send({ error: "Database transaction could not be initiated." });
                 return;
             }
 
-            // 제공된 UUID로 방이 존재하는지 확인
+            // Check if room with provided UUID exists
             db.query(
                 "SELECT * FROM Rooms WHERE uuid = ?",
                 [UUID],
@@ -27,7 +27,7 @@ const joinRoomRouter = (db) => {
                         return;
                     }
 
-                    // 닉네임이 방 내에서 이미 존재하는지 확인
+                    // Check if nickname already exists in the room
                     db.query(
                         "SELECT * FROM Users WHERE nickname = ? AND room_id = ?",
                         [nickname, roomResult[0].id],
@@ -39,7 +39,7 @@ const joinRoomRouter = (db) => {
                                 return;
                             }
 
-                            if (existingUserResult.length > roomResult[0].player_num -2 ) {
+                            if (existingUserResult.length >= roomResult[0].player_num -1 ) {
                                 db.rollback(() => {
                                     res.status(422).send({ error: "The room is already full." });
                                 });
@@ -53,7 +53,7 @@ const joinRoomRouter = (db) => {
                                 return;
                             }
 
-                            // 방이 확인되고 닉네임이 중복되지 않을 경우, Users 테이블에 room_id와 함께 삽입
+                            // After Room is confirmed and nickname is not duplicated, insert into Users table with the room_id
                             db.query(
                                 "INSERT INTO Users (nickname, score, is_host, room_id) VALUES (?, 0, 0, ?)",
                                 [nickname, roomResult[0].id],
@@ -65,7 +65,7 @@ const joinRoomRouter = (db) => {
                                         return;
                                     }
 
-                                    // 참여한 사용자 조회
+                                    // Get the joined user
                                     db.query(
                                         `SELECT * FROM Users WHERE id = ?`,
                                         [userResult.insertId],
@@ -75,15 +75,15 @@ const joinRoomRouter = (db) => {
                                             } else {
                                                 const user = userResults[0];
 
-                                                // 오류가 없다면 트랜잭션 커밋
+                                                // If no errors, commit the transaction
                                                 db.commit(err => {
                                                     if (err) {
                                                         res.status(422).send({ error: "Database transaction could not be completed.", err });
                                                         return;
                                                     }
 
-                                                    // 참여한 사용자를 클라이언트에 전송
-                                                    res.status(201).send({ user });
+                                                    // Send the joined user to the client
+                                                    res.status(201).send({ score: user.score });
                                                 });
                                             }
                                         }
