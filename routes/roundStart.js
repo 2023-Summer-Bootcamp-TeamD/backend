@@ -28,7 +28,7 @@ db.connect((err) => {
 // 뽑힌 닉네임을 저장하는 전역 배열 변수
 const usedNicknames = [];
 
-router.get('/api/v1/rooms/:room_id/rounds', async (req, res) => {
+router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
     try {
         // room_id가 1번이라고 가정
         const room_id = req.params.room_id;

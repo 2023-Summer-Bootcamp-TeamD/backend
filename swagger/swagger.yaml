@@ -1,0 +1,149 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Pingo Bingo API 
+  description: API description
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Backend endpoints
+paths:
+  /api/v1/rooms:
+    post:
+      tags:
+        - Backend endpoints
+      summary: 사용자 방만들기 API 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category_id:
+                  type: integer
+                time:
+                  type: integer
+                player_num:
+                  type: integer
+                nickname:
+                  type: string
+              required:
+                - category_id
+                - time
+                - player_num
+                - nickname
+      responses:
+        201:
+          description: Room successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                  score:
+                    type: integer
+        422:
+          description: Validation error
+  /api/v1/rooms/users/{UUID}:
+    post:
+      tags:
+        - Backend endpoints
+      summary: 사용자 입장하기 API 
+      parameters:
+        - in: path
+          name: UUID
+          schema:
+            type: string
+          required: true
+          description: Unique ID of the room
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+              required:
+                - nickname
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  score:
+                    type: integer
+        422:
+          description: Validation error
+  /api/v1/rooms/{room_id}/game/rounds:
+    get:
+      tags:
+        - Backend endpoints
+      summary: 라운드 별 게임 시작 API 
+      parameters:
+        - in: path
+          name: room_id
+          schema:
+            type: integer
+          required: true
+          description: Unique ID of the room
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room_id:
+                    type: integer
+                  time:
+                    type: integer
+                  word:
+                    type: string
+                  nickname:
+                    type: string
+        500:
+          description: Server error
+  /api/v1/rooms/{room_id}/picture/rounds:
+    post:
+      tags:
+        - Backend endpoints
+      summary: 게임 라운드별 그림 저장 API
+      description: 매 라운드마다 출제자가 그린 그림을 S3에 저장한다.
+      parameters:
+        - in: path
+          name: room_id
+          schema:
+            type: integer
+          required: true
+          description: Unique ID of the room
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+                - image
+      responses:
+        201:
+          description: Image successfully uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location:
+                    type: string
+                    description: The URL of the uploaded image in S3
+        500:
+          description: Failed to upload image to S3
