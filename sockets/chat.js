@@ -36,13 +36,13 @@ export default (io) => {
             socket.broadcast
                 .to(socket.room)
                 .emit("updateChat", { type: "INFO", message: `${socket.nickname}님이 ${socket.room}방에 접속하였습니다!` });
-            // 플레이어가 방에 입장할때마다 방의 참여인원이 1씩 증가
+            
             io.sockets.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
         });
 
 
 
-        // 매라운드가 시작
+        // 게임 매라운드 시작
         socket.on("startRound", ({roomId, drawNickname, selectWord}) => {
             gameWord[roomId] = selectWord;
         
@@ -51,7 +51,12 @@ export default (io) => {
             } else {
                 rounds[roomId] = 1;
             }
-            // 그림을 그리는 플레이어만 단어 전달
+
+            if(rounds[roomId] >= playerCount[roomId]){
+                endGame(roomId);
+                return;
+            }
+
             io.sockets.to(socket.room).sockets.forEach((socket) => {
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
@@ -59,10 +64,6 @@ export default (io) => {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], drawer: drawNickname });
                 }
             });
-        
-            if(rounds[roomId] >= maxPlayersPerRoom[roomId]){
-                endGame(roomId);
-            }
         });
 
 
