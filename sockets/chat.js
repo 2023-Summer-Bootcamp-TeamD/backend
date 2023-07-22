@@ -11,6 +11,7 @@ export default (io) => {
         console.log("새로운 플레이어가 서버에 접속했습니다!");
 
 
+        
         // 플레이어 방입장 및 메세지 전송
         socket.on("createUser", ({nickname, roomId}) => {
             // 닉네임 중복 처리
@@ -21,6 +22,7 @@ export default (io) => {
 
             socket.nickname = nickname;
             nicknames[nickname] = true;
+            scores[nickname] = 0;
             socket.room = roomId;
             socket.join(socket.room);
 
@@ -57,7 +59,10 @@ export default (io) => {
                 return;
             }
 
-            io.sockets.to(socket.room).sockets.forEach((socket) => {
+            io.sockets.to(roomId).sockets.forEach((socket) => {
+
+                io.sockets.to(roomId).emit("updateScores", { scores: scores });
+
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
                 } else {
@@ -67,15 +72,33 @@ export default (io) => {
         });
 
 
+        // 그림 받고 클라이언트에게 뿌리기
+
+        // 채팅 메세지
+        socket.on("sendMessage", (msg) => {
+            // 정답과 비교하여 점수 업데이트
+            if (msg.trim() !== "" && msg === gameWord[socket.room]) {
+                scores[socket.nickname]++;
+            }
+        });
 
 
-        // 라운드 종료
 
-        
-        // 메세지 보내기
+
         socket.on("sendMessage", (msg) => {
             io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
+
+        
+
+        // 라운드 종료 -> s3 저장 api 호출
+
+
+        // 게임종료 로직 -> 순위 내림차순 api 호출
+
+
+
+        
 
         // 클라이언트 연결 종료
         socket.on("disconnect", () => {
