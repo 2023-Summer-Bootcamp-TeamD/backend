@@ -68,6 +68,8 @@ export default (io) => {
 
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
+                    io.sockets.to(socket.room).emit("announceGameWord", { type: "INFO", message: `이번 라운드의 정답은 ${gameWord[socket.room]} 입니다!` });
+                    io.sockets.to(socket.room).emit("announce맞춘사람", { type : "INFO", message : `${socket.nickname} 님이 정답을 맞췄습니다!` });
                 } else {
                     socket.emit("announceCorrect", { round: rounds[roomId], drawer: drawNickname });
                 }
