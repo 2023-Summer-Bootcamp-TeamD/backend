@@ -169,7 +169,8 @@ export default (io) => {
             // 플레이어가 처음 소켓 연결만 하고 특정 방에 들어가지 않았을 경우 예외처리
             if(socket.room){ 
                 playerCount[socket.room]--;
-                io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
+                delete scores[socket.room][socket.nickname];
+                io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });     
                 socket.broadcast
                     .to(socket.room)
                     .emit("updateChat", { type: "INFO", message: `${socket.nickname}님의 연결이 종료되었습니다.` });
