@@ -100,11 +100,11 @@ export default (io) => {
 
             io.to(roomId).sockets.forEach((socket) => {
 
-                if (socket.nickname === drawNickname) {
-                    socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
-                } else {
-                    socket.emit("announceRoundInfo", { round: rounds[roomId], drawer: drawNickname });
-                }
+                socket.emit("announceRoundInfo", { 
+                    round: rounds[roomId], 
+                    word: socket.nickname === drawNickname ? gameWord[roomId] : null, 
+                    drawer: drawNickname 
+                });
             });
 
             setTimeout(() => {
