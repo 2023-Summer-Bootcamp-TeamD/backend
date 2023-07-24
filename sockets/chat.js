@@ -75,10 +75,6 @@ export default (io) => {
         });
 
 
-        // 그림 받고 클라이언트에게 뿌리기
-
-
-
 
         // 채팅 메세지 구현
         socket.on("sendMessage", (msg) => {
@@ -89,12 +85,17 @@ export default (io) => {
             io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
 
-        
+    
+    
+        // 캔버스 기능
+        socket.on("canvasDraw", (drawData) => {
+            socket.broadcast.to(socket.room).emit("canvasDraw", {drawData: drawData});
+        });
 
 
 
 
-        
+
 
         // 클라이언트 연결 종료
         socket.on("disconnect", () => {
