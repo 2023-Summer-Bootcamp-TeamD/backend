@@ -177,9 +177,10 @@ export default (io) => {
                     delete gameWord[socket.room];
                     delete rounds[socket.room];
                     delete roundEnded[socket.room];
+                } else {
+                    io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
                 }
-                
-                io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });     
+   
                 socket.broadcast
                     .to(socket.room)
                     .emit("updateChat", { type: "INFO", message: `${socket.nickname}님의 연결이 종료되었습니다.` });
