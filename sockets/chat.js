@@ -96,9 +96,9 @@ export default (io) => {
 
             io.to(roomId).emit("startRoundTimer", { startTime: startTime, endTime: endTime });
 
-            io.to(roomId).sockets.forEach((socket) => {
+            io.to(roomId).emit("updateScores", { scores: scores[roomId] });
 
-                io.to(roomId).emit("updateScores", { scores: scores[roomId] });
+            io.to(roomId).sockets.forEach((socket) => {
 
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
