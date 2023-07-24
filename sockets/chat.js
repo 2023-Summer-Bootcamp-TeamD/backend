@@ -27,7 +27,7 @@ export default (io) => {
     let scores = {}; // 방의 플레이어의 점수 { 방: { 플레이어: 점수 } }
     let gameWord = {}; //각 방의 게임단어
     let rounds = {}; // 라운드 count 해주는 객체
-    // let roundEnded = {}; // 라운드 종료 여부 { 방: 종료여부 }
+    let roundEnded = {}; // 라운드 종료 여부 { 방: 종료여부 }
 
     
     // 클라이언트가 소켓에 처음 연결
@@ -86,6 +86,8 @@ export default (io) => {
             }
 
             gameWord[roomId] = selectWord;
+
+            roundEnded[roomId] = false;
        
             const startTime = Date.now();
             const endTime = startTime + limitedTime * 1000; 
@@ -102,12 +104,24 @@ export default (io) => {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], drawer: drawNickname });
                 }
             });
+
+            setTimeout(() => {
+                if (roundEnded[roomId]) {
+                    return;
+                }
+
+                roundEnded[roomId] = true;
+                io.to(roomId).emit("announceResult", { gameWord: gameWord[roomId], correctUser: null, roundEnded: true });
+            }, limitedTime * 1000);       
         });
 
 
 
         // 채팅 메세지 구현
         socket.on("sendMessage", (msg) => {
+            if (roundEnded[socket.room]) {
+                return;
+            }
             // 정답 맞추면 로직처리
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
                 scores[socket.room][socket.nickname]++;
