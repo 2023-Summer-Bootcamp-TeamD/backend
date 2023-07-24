@@ -65,7 +65,7 @@ export default (io) => {
             const startTime = Date.now();
             const endTime = startTime + limitedTime * 1000; 
 
-            io.to(roomId).emit("startRoundTimer", { startTime, endTime });
+            io.to(roomId).emit("startRoundTimer", { startTime: startTime, endTime: endTime });
 
             io.to(roomId).sockets.forEach((socket) => {
 
