@@ -68,10 +68,8 @@ export default (io) => {
 
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
-                    io.sockets.to(socket.room).emit("announceGameWord", { type: "INFO", message: `이번 라운드의 정답은 ${gameWord[socket.room]} 입니다!` });
-                    io.sockets.to(socket.room).emit("announceCorrect", { type : "INFO", message : `${socket.nickname} 님이 정답을 맞췄습니다!` });
                 } else {
-                    socket.emit("announceCorrect", { round: rounds[roomId], drawer: drawNickname });
+                    socket.emit("announceRoundInfo", { round: rounds[roomId], drawer: drawNickname });
                 }
             });
         });
@@ -83,6 +81,8 @@ export default (io) => {
             // 정답 맞추면 로직처리
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
                 scores[socket.room][socket.nickname]++;
+                io.sockets.to(socket.room).emit("announceGameWord", { type: "INFO", message: `이번 라운드의 정답은 ${gameWord[socket.room]} 입니다!` });
+                io.sockets.to(socket.room).emit("announceCorrect", { type : "INFO", message : `${socket.nickname} 님이 정답을 맞췄습니다!` });
             }
             io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
