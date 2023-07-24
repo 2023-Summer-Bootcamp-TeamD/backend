@@ -1,7 +1,7 @@
 export default (io) => {
     let playerCount = {}; // 방의 참여인원 count 해주는 객체
     let nicknames = {}; // 플레이어 닉네임
-    let scores = {}; // 플레이어 점수
+    let scores = {}; // 방의 플레이어의 점수 { 방: { 플레이어: 점수 } }
     let gameWord = {}; //각 방의 게임단어
     let rounds = {}; // 라운드 count 해주는 객체
 
@@ -10,7 +10,7 @@ export default (io) => {
     io.on("connection", (socket) => {
         console.log("새로운 플레이어가 서버에 접속했습니다!");
 
-
+        
         
         // 플레이어 방입장 및 메세지 전송
         socket.on("createUser", ({nickname, roomId}) => {
@@ -22,7 +22,10 @@ export default (io) => {
 
             socket.nickname = nickname;
             nicknames[nickname] = true;
-            scores[nickname] = 0;
+
+            scores[roomId] = scores[roomId] || {};
+            scores[roomId][nickname] = 0;
+
             socket.room = roomId;
             socket.join(socket.room);
 
@@ -74,26 +77,17 @@ export default (io) => {
 
         // 그림 받고 클라이언트에게 뿌리기
 
-        // 채팅 메세지 
+
+
+
+        // 채팅 메세지 구현
         socket.on("sendMessage", (msg) => {
-            // 정답과 비교하여 점수 업데이트
+            // 정답 맞추면 로직처리
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
-                scores[socket.nickname]++;
+                scores[socket.room][socket.nickname]++;
             }
+            io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
-
-
-
-        // 정답 맞추면 로직처리
-
-
-
-
-
-
-        // socket.on("sendMessage", (msg) => {
-        //     io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
-        // });
 
         
 
