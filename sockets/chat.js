@@ -34,6 +34,14 @@ export default (io) => {
     io.on("connection", (socket) => {
         console.log("새로운 플레이어가 서버에 접속했습니다!");
 
+
+
+        // 방 생성
+        socket.on("createRoom", (roomId) => {
+            scores[roomId] = {};
+            playerCount[roomId] = 0;
+        });
+
         
         
         // 플레이어 방입장 및 메세지 전송
@@ -47,17 +55,11 @@ export default (io) => {
             socket.nickname = nickname;
             nicknames[nickname] = true;
 
-            scores[roomId] = scores[roomId] || {};
             scores[roomId][nickname] = 0;
+            playerCount[roomId]++;
 
             socket.room = roomId;
             socket.join(socket.room);
-
-            if(playerCount[socket.room]){ 
-                playerCount[socket.room]++;
-            } else {
-                playerCount[socket.room] = 1;
-            }
 
             console.log(`플레이어 ${socket.nickname} 님이 성공적으로 서버에 생성되었습니다!`);
 
