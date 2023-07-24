@@ -81,8 +81,7 @@ export default (io) => {
             // 정답 맞추면 로직처리
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
                 scores[socket.room][socket.nickname]++;
-                io.sockets.to(socket.room).emit("announceGameWord", { type: "INFO", message: `이번 라운드의 정답은 ${gameWord[socket.room]} 입니다!` });
-                io.sockets.to(socket.room).emit("announceCorrect", { type : "INFO", message : `${socket.nickname} 님이 정답을 맞췄습니다!` });
+                io.sockets.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname });
             }
             io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
