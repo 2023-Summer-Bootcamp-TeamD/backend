@@ -1,9 +1,33 @@
+import User from './models/User'; 
+
+
+// 게임 종료시 해당 방의 플레이어들의 최종 점수들을 DB에 삽입
+const endGame = async (roomId) => {
+    try {
+        // 점수를 데이터베이스에 업데이트
+        for(let nickname in scores[roomId]) {
+            let user = await User.findOne({ where: { nickname, room_id: roomId } });
+            if(user) {
+                user.score = scores[roomId][nickname];
+                await user.save();
+            }
+        }
+        // 게임 종료 알림
+        io.to(roomId).emit("endGame", { message: "게임이 종료되었습니다!" });
+    } catch(error) {
+        console.error(error);
+    }
+};
+
+
+
 export default (io) => {
     let playerCount = {}; // 방의 참여인원 count 해주는 객체
     let nicknames = {}; // 플레이어 닉네임
     let scores = {}; // 방의 플레이어의 점수 { 방: { 플레이어: 점수 } }
     let gameWord = {}; //각 방의 게임단어
     let rounds = {}; // 라운드 count 해주는 객체
+    // let roundEnded = {}; // 라운드 종료 여부 { 방: 종료여부 }
 
     
     // 클라이언트가 소켓에 처음 연결
@@ -49,7 +73,6 @@ export default (io) => {
 
         // 게임 매라운드 시작
         socket.on("startRound", ({roomId, drawNickname, selectWord, limitedTime}) => {
-            gameWord[roomId] = selectWord;
         
             if(rounds[roomId]){
                 rounds[roomId]++;
@@ -61,6 +84,8 @@ export default (io) => {
                 endGame(roomId);
                 return;
             }
+
+            gameWord[roomId] = selectWord;
        
             const startTime = Date.now();
             const endTime = startTime + limitedTime * 1000; 
@@ -86,7 +111,7 @@ export default (io) => {
             // 정답 맞추면 로직처리
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
                 scores[socket.room][socket.nickname]++;
-                io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname });
+                io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname, roundEnded: true });
             }
             io.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
@@ -115,13 +140,9 @@ export default (io) => {
 
 
         // 캔버스 전체 지우기
-        socket.on("canvasEraseAll", ({roomId}) => {
+        socket.on("canvasEraseAll", (roomId) => {
             socket.broadcast.to(roomId).emit("canvasEraseAll");
         });
-
-
-
-        // 게임 종료 함수
 
 
 
