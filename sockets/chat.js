@@ -101,13 +101,18 @@ export default (io) => {
         });
 
 
-        
+
         // 캔버스 일부 지우기
         socket.on("canvasErase", ({roomId, eraseData}) => {
             socket.broadcast.to(roomId).emit("canvasErase", { eraseData });
         });
 
 
+
+        // 캔버스 전체 지우기
+        socket.on("canvasEraseAll", ({ roomId }) => {
+            socket.broadcast.to(roomId).emit("canvasEraseAll");
+        });
 
 
 
