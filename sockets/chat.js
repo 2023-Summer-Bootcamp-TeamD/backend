@@ -57,7 +57,7 @@ export default (io) => {
                 rounds[roomId] = 1;
             }
 
-            if(rounds[roomId] >= playerCount[roomId]){
+            if(rounds[roomId] > playerCount[roomId]){
                 endGame(roomId);
                 return;
             }
@@ -118,6 +118,10 @@ export default (io) => {
         socket.on("canvasEraseAll", ({roomId}) => {
             socket.broadcast.to(roomId).emit("canvasEraseAll");
         });
+
+
+
+        // 게임 종료 함수
 
 
 
