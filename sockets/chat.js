@@ -42,13 +42,13 @@ export default (io) => {
                 .to(socket.room)
                 .emit("updateChat", { type: "INFO", message: `${socket.nickname}님이 ${socket.room}방에 접속하였습니다!` });
             
-            io.sockets.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
+            io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
         });
 
 
 
         // 게임 매라운드 시작
-        socket.on("startRound", ({roomId, drawNickname, selectWord}) => {
+        socket.on("startRound", ({roomId, drawNickname, selectWord, limitedTime}) => {
             gameWord[roomId] = selectWord;
         
             if(rounds[roomId]){
@@ -61,10 +61,15 @@ export default (io) => {
                 endGame(roomId);
                 return;
             }
+       
+            const startTime = Date.now();
+            const endTime = startTime + limitedTime * 1000; 
 
-            io.sockets.to(roomId).sockets.forEach((socket) => {
+            io.to(roomId).emit("startRoundTimer", { startTime, endTime });
 
-                io.sockets.to(roomId).emit("updateScores", { scores: scores[roomId] });
+            io.to(roomId).sockets.forEach((socket) => {
+
+                io.to(roomId).emit("updateScores", { scores: scores[roomId] });
 
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
@@ -81,9 +86,9 @@ export default (io) => {
             // 정답 맞추면 로직처리
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
                 scores[socket.room][socket.nickname]++;
-                io.sockets.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname });
+                io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname });
             }
-            io.sockets.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
+            io.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
 
     
@@ -123,7 +128,7 @@ export default (io) => {
             // 플레이어가 처음 소켓 연결만 하고 특정 방에 들어가지 않았을 경우 예외처리
             if(socket.room){ 
                 playerCount[socket.room]--;
-                io.sockets.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
+                io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
                 socket.broadcast
                     .to(socket.room)
                     .emit("updateChat", { type: "INFO", message: `${socket.nickname}님의 연결이 종료되었습니다.` });
