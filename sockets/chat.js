@@ -69,7 +69,7 @@ export default (io) => {
                 if (socket.nickname === drawNickname) {
                     socket.emit("announceRoundInfo", { round: rounds[roomId], word: gameWord[roomId], drawer: drawNickname });
                 } else {
-                    socket.emit("announceRoundInfo", { round: rounds[roomId], drawer: drawNickname });
+                    socket.emit("announceCorrect", { round: rounds[roomId], drawer: drawNickname });
                 }
             });
         });
@@ -87,10 +87,11 @@ export default (io) => {
 
     
     
-        // 캔버스 기능
-        socket.on("canvasDraw", (drawData) => {
+        // 캔버스의 그림 전송
+        socket.on("canvasDraw", ({roomId, drawData}) => {
             socket.broadcast.to(socket.room).emit("canvasDraw", {drawData: drawData});
         });
+
 
 
 
