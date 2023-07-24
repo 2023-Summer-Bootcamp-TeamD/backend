@@ -90,10 +90,15 @@ export default (io) => {
     
         // 캔버스의 그림 전송
         socket.on("canvasDraw", ({roomId, drawData}) => {
-            socket.broadcast.to(socket.room).emit("canvasDraw", {drawData: drawData});
+            socket.broadcast.to(roomId).emit("canvasDraw", { drawData: drawData });
         });
 
 
+
+        // 캔버스 색상 변경
+        socket.on("canvasChangeColor", ({roomId, selectedColor}) => {
+            socket.broadcast.to(roomId).emit("changeColor", { selectedColor: selectedColor });
+        });
 
 
 
