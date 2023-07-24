@@ -170,6 +170,15 @@ export default (io) => {
             if(socket.room){ 
                 playerCount[socket.room]--;
                 delete scores[socket.room][socket.nickname];
+
+                if(playerCount[socket.room] === 0) {
+                    delete playerCount[socket.room];
+                    delete scores[socket.room];
+                    delete gameWord[socket.room];
+                    delete rounds[socket.room];
+                    delete roundEnded[socket.room];
+                }
+                
                 io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });     
                 socket.broadcast
                     .to(socket.room)
