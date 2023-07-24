@@ -28,6 +28,7 @@ export default (io) => {
     let gameWord = {}; //각 방의 게임단어
     let rounds = {}; // 라운드 count 해주는 객체
     let roundEnded = {}; // 라운드 종료 여부 { 방: 종료여부 }
+    let timers = {}; // 타이머 
 
     
     // 클라이언트가 소켓에 처음 연결
@@ -107,14 +108,14 @@ export default (io) => {
                 });
             });
 
-            setTimeout(() => {
+            timers[roomId] = setTimeout(() => {
                 if (roundEnded[roomId]) {
                     return;
                 }
 
                 roundEnded[roomId] = true;
                 io.to(roomId).emit("announceResult", { gameWord: gameWord[roomId], correctUser: null, roundEnded: true });
-            }, limitedTime * 1000);       
+            }, limitedTime * 1000);
         });
 
 
@@ -128,6 +129,8 @@ export default (io) => {
             if (msg.trim() !== "" && msg === gameWord[socket.room]) {
                 scores[socket.room][socket.nickname]++;
                 io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname, roundEnded: true });
+
+                clearTimeout(timers[socket.room]);
             }
             io.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
