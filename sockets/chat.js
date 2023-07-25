@@ -41,7 +41,6 @@ export default (io) => {
         // 방 생성
         socket.on("createRoom", (roomId) => {
             scores[roomId] = scores[roomId] || {};
-            playerCount[roomId] = 0;
 
             console.log(`${roomId} 방이 생성되었습니다!`);
         });
@@ -61,7 +60,12 @@ export default (io) => {
             
             scores[roomId] = scores[roomId] || {};
             scores[roomId][nickname] = 0;
+
+            if (!playerCount[roomId]) {
+                playerCount[roomId] = 0;
+            }
             playerCount[roomId]++;
+            
 
             socket.room = roomId;
             socket.join(socket.room);
