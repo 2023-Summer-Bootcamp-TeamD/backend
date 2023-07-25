@@ -10,6 +10,7 @@ const endGame = async (roomId) => {
             if(user) {
                 user.score = scores[roomId][nickname];
                 await user.save();
+                console.log("DB에 플레이어들의 최종 점수들을 저장했습니다!");
             }
         }
         // 게임 종료 알림
@@ -41,6 +42,8 @@ export default (io) => {
         socket.on("createRoom", (roomId) => {
             scores[roomId] = scores[roomId] || {};
             playerCount[roomId] = 0;
+
+            console.log(`${roomId} 방이 생성되었습니다!`);
         });
 
         
@@ -63,13 +66,12 @@ export default (io) => {
             socket.room = roomId;
             socket.join(socket.room);
 
-            console.log(`플레이어 ${socket.nickname} 님이 성공적으로 서버에 생성되었습니다!`);
+            console.log(`플레이어 ${socket.nickname}님이 ${socket.room}에 들어왔습니다.`);
 
             socket.emit("updateChat", { type: "INFO", message: "방에 접속하였습니다!" });
             socket.broadcast
                 .to(socket.room)
-                .emit("updateChat", { type: "INFO", message: `${socket.nickname}님이 ${socket.room}방에 접속하였습니다!` });
-            
+                .emit("updateChat", { type: "INFO", message: `${socket.nickname}님이 ${socket.room}방에 접속하였습니다!` });            
             io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
         });
 
@@ -83,9 +85,11 @@ export default (io) => {
             } else {
                 rounds[roomId] = 1;
             }
+            console.log(`${rounds[roomId]} 라운드가 시작되었습니다!`);
 
             if(rounds[roomId] > playerCount[roomId]){
                 endGame(roomId);
+                
                 return;
             }
 
@@ -107,6 +111,7 @@ export default (io) => {
                     word: socket.nickname === drawNickname ? gameWord[roomId] : null, 
                     drawer: drawNickname 
                 });
+                console.log(`${rounds[roomId]}의 단어는 ${selectWord} 이며 그리는 사람은 ${drawNickname} 플레이어입니다!`);
             });
 
             timers[roomId] = setTimeout(() => {
