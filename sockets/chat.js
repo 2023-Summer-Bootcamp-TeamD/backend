@@ -39,7 +39,7 @@ export default (io) => {
 
         // 방 생성
         socket.on("createRoom", (roomId) => {
-            scores[roomId] = {};
+            scores[roomId] = scores[roomId] || {};
             playerCount[roomId] = 0;
         });
 
@@ -55,7 +55,8 @@ export default (io) => {
 
             socket.nickname = nickname;
             nicknames[nickname] = true;
-
+            
+            scores[roomId] = scores[roomId] || {};
             scores[roomId][nickname] = 0;
             playerCount[roomId]++;
 
