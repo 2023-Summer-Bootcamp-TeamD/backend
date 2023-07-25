@@ -1,4 +1,4 @@
-import User from './models/User'; 
+import User from '../models/user'; 
 
 
 // 게임 종료시 해당 방의 플레이어들의 최종 점수들을 DB에 삽입
