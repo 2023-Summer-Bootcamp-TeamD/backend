@@ -132,11 +132,8 @@ export default (io) => {
 
         // 채팅 메세지 구현
         socket.on("sendMessage", (msg) => {
-            if (roundEnded[socket.room]) {
-                return;
-            }
             // 정답 맞추면 로직처리
-            if (msg.trim() !== "" && msg === gameWord[socket.room]) {
+            if (msg.trim() !== "" && msg === gameWord[socket.room] && !roundEnded[socket.room]) {
                 scores[socket.room][socket.nickname]++;
                 io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname, roundEnded: true });
 
