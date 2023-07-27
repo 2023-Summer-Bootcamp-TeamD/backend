@@ -28,7 +28,8 @@ db.connect((err) => {
 // 뽑힌 닉네임을 저장하는 전역 배열 변수
 const usedNicknames = [];
 
-router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
+router.get('/api/v1/rooms/:room_id/game/rounds', async (req, res) => {
+
     try {
         // room_id가 1번이라고 가정
         const room_id = req.params.room_id;
@@ -40,7 +41,7 @@ router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
         // 제한시간 가져오기
         const getTime = () => {
         return new Promise((resolve, reject) => {
-            db.query(`SELECT time FROM Rooms WHERE id=${room_id}`, (err, result) => {
+            db.query(`SELECT time FROM Rooms WHERE uuid='${room_id}'`, (err, result) => {
             if (err) {
                 reject(err);
             } else {
@@ -56,7 +57,7 @@ router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
         const getWord = () => {
         return new Promise((resolve, reject) => {
             // 현재 방(room)에 대해 이전에 선택된 word_id를 조회합니다.
-            db.query(`SELECT word_id FROM Rounds WHERE room_id = ${room_id} AND word_id IS NOT NULL`, (err, result) => {
+            db.query(`SELECT word_id FROM Rounds WHERE room_id = (SELECT id FROM Rooms WHERE uuid = '${room_id}') AND word_id IS NOT NULL`, (err, result) => {
             if (err) {
                 reject(err);
             } else {
@@ -66,13 +67,13 @@ router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
                 let query;
                 if (excludedWordIds.length > 0) {
                 query = `SELECT word, id FROM Words 
-                        WHERE category_id = (SELECT category_id FROM Rooms WHERE id = ${room_id}) 
+                        WHERE category_id = (SELECT category_id FROM Rooms WHERE uuid = '${room_id}') 
                         AND id NOT IN (${excludedWordIds.join(',')}) 
                         ORDER BY RAND() 
                         LIMIT 1`;
                 } else {
                 query = `SELECT word, id FROM Words 
-                        WHERE category_id = (SELECT category_id FROM Rooms WHERE id = ${room_id}) 
+                        WHERE category_id = (SELECT category_id FROM Rooms WHERE uuid = '${room_id}') 
                         ORDER BY RAND() 
                         LIMIT 1`;
                 }
@@ -97,7 +98,8 @@ router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
         // 추출한 단어의 id를 Rouds 테이블의 room_id가 url에 있는 room_id이고 word_id가 null인 레코드 중에서 id가 제일 작은 레코드의 word_id에 랜덤으로 추출한 word_id를 삽입
         const updateWordId = () => {
         return new Promise((resolve, reject) => {
-            db.query(`UPDATE Rounds SET word_id = ${word_id} WHERE room_id = ${room_id} AND word_id IS NULL AND id IN (SELECT id FROM (SELECT MIN(id) AS id FROM Rounds WHERE room_id = ${room_id} AND word_id IS NULL) AS tmp)`, (err, result) => {
+            db.query(`UPDATE Rounds SET word_id = ${word_id} WHERE room_id = (SELECT id FROM Rooms WHERE uuid = '${room_id}') 
+                    AND word_id IS NULL AND id IN (SELECT id FROM (SELECT MIN(id) AS id FROM Rounds WHERE room_id = (SELECT id FROM Rooms WHERE uuid = '${room_id}') AND word_id IS NULL) AS tmp)`, (err, result) => {
             if (err) {
                 reject(err);
             } else {
@@ -117,7 +119,7 @@ router.get('/api/v1/rooms/{room_id}/game/rounds', async (req, res) => {
         */
         const getNickName = () => {
         return new Promise((resolve, reject) => {
-            db.query(`SELECT nickname FROM Users WHERE room_id=${room_id}`, (err, result) => {
+            db.query(`SELECT nickname FROM Users WHERE room_id = (SELECT id FROM Rooms WHERE uuid = '${room_id}')`, (err, result) => {
             if (err) {
                 reject(err);
             } else {
