@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    monitor: "uzukilive-monitor"
+scrape_configs:
+  - job_name: "cadvisor" # Renamed to match the new service name
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - "cadvisor:8080" # Update the target to use the cadvisor service
+  - job_name: "node-exporter" # Renamed to match the new service name
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - "node-exporter:9100"
