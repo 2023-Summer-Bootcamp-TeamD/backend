@@ -1,5 +1,4 @@
 import express from 'express';
-import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
@@ -82,8 +81,8 @@ const joinRoomRouter = (db) => {
                                                         return;
                                                     }
 
-                                                    // Send the joined user to the client
-                                                    res.status(201).send({ score: user.score });
+                                                    const room = roomResult[0];
+                                                    res.status(201).send({ time: room.time, player_num: room.player_num, category_id: room.category_id, score: user.score });
                                                 });
                                             }
                                         }

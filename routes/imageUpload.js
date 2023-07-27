@@ -43,7 +43,9 @@ const s3 = new aws.S3({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+
 router.post('/api/v1/rooms/:room_id/picture/rounds', upload.single('image'), (req, res) => {
+  
   const file = req.file;
   const fileContent = file.buffer;
   const room_id = req.params.room_id;
