@@ -78,6 +78,11 @@ export default (io) => {
                 .emit("updateChat", { type: "INFO", message: `${socket.nickname}님이 ${socket.room}방에 접속하였습니다!` });            
             io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
 
+            Object.keys(scores[roomId]).forEach((existingPlayer) => {
+                if (existingPlayer !== nickname) { 
+                    socket.emit("updateUserInfo", {nickname: existingPlayer, score: scores[roomId][existingPlayer]});
+                }
+            });
             io.to(socket.room).emit("updateUserInfo", {nickname: socket.nickname, score: scores[roomId][nickname]});
         });
 
