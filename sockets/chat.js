@@ -81,6 +81,13 @@ export default (io) => {
 
 
 
+        // 스타트 버튼을 누르기
+        socket.on("pressGameStartButton", (pressButton) => {
+            socket.broadcast.to(roomId).emit("pressGameStartButton", {pressButton: pressButton});
+        });
+
+        
+
         // 게임 매라운드 시작
         socket.on("startRound", ({roomId, drawNickname, selectWord, limitedTime}) => {
         
