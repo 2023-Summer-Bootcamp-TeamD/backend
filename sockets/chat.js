@@ -43,6 +43,7 @@ export default (io) => {
             scores[roomId] = scores[roomId] || {};
 
             console.log(`${roomId} 방이 생성되었습니다!`);
+            socket.emit("roomCreated");
         });
 
         
