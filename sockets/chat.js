@@ -90,7 +90,7 @@ export default (io) => {
 
 
         // 스타트 버튼을 누르기
-        socket.on("pressGameStartButton", (pressButton) => {
+        socket.on("pressGameStartButton", ({roomId, pressButton}) => {
             socket.broadcast.to(roomId).emit("pressGameStartButton", {pressButton: pressButton});
         });
 
