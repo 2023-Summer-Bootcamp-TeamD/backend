@@ -24,7 +24,7 @@ const endGame = async (roomId) => {
 
 export default (io) => {
     let playerCount = {}; // 방의 참여인원 count 해주는 객체
-    let nicknames = {}; // 플레이어 닉네임
+    let nicknames = {}; // 플레이어 닉네임 중복 체크
     let scores = {}; // 방의 플레이어의 점수 { 방: { 플레이어: 점수 } }
     let gameWord = {}; //각 방의 게임단어
     let rounds = {}; // 라운드 count 해주는 객체
@@ -77,6 +77,8 @@ export default (io) => {
                 .to(socket.room)
                 .emit("updateChat", { type: "INFO", message: `${socket.nickname}님이 ${socket.room}방에 접속하였습니다!` });            
             io.to(socket.room).emit("updateChatNum", { playerCount: playerCount[socket.room] });
+
+            io.to(socket.room).emit("updateUserInfo", {nickname: socket.nickname, score: scores[roomId][nickname]});
         });
 
 
@@ -86,7 +88,7 @@ export default (io) => {
             socket.broadcast.to(roomId).emit("pressGameStartButton", {pressButton: pressButton});
         });
 
-        
+
 
         // 게임 매라운드 시작
         socket.on("startRound", ({roomId, drawNickname, selectWord, limitedTime}) => {
