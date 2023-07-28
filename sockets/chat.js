@@ -1,4 +1,6 @@
 import User from '../models/user'; 
+import Word from '../models/word'; 
+import { Sequelize } from 'sequelize';
 
 
 // 게임 종료시 해당 방의 플레이어들의 최종 점수들을 DB에 삽입
@@ -90,14 +92,14 @@ export default (io) => {
 
 
         // 스타트 버튼을 누르기
-        socket.on("pressGameStartButton", (pressButton) => {
+        socket.on("pressGameStartButton", ({roomId, pressButton}) => {
             socket.broadcast.to(roomId).emit("pressGameStartButton", {pressButton: pressButton});
         });
 
 
 
         // 게임 매라운드 시작
-        socket.on("startRound", ({roomId, drawNickname, selectWord, limitedTime}) => {
+        socket.on("startRound", async ({roomId, limitedTime}) => {
         
             if(rounds[roomId]){
                 rounds[roomId]++;
@@ -112,7 +114,23 @@ export default (io) => {
                 return;
             }
 
-            gameWord[roomId] = selectWord;
+            const usersInRoom = await User.findAll({ where: { room_id: roomId } });
+            console.log("해당 방의 플레이어 리스트: ", usersInRoom); // 모든 사용자 정보 출력
+
+            const drawUserIndex = Math.floor(Math.random() * usersInRoom.length);
+            console.log("그림 그릴 사람의 인덱스: ", drawUserIndex); // 선택된 사용자 인덱스 출력
+
+            const drawNickname = usersInRoom[drawUserIndex].nickname;
+            console.log("그림 그릴 사람: ", drawNickname); // 선택된 사용자 닉네임 출력
+
+            const selectedWord = await Word.findOne({ order: Sequelize.literal('rand()') });
+            console.log("선택된 단어: ", selectedWord); // 선택된 단어 출력
+
+            gameWord[roomId] = selectedWord.word;
+            console.log("해당 방의 게임 단어: ", gameWord[roomId]); 
+
+
+            gameWord[roomId] = selectedWord.word;
 
             roundEnded[roomId] = false;
        
