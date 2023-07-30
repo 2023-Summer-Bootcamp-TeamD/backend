@@ -1,19 +1,42 @@
-import User from '../models/user'; 
-import Word from '../models/word'; 
-import { Sequelize } from 'sequelize';
+const dotenv = require('dotenv');
+const mysql = require('mysql2');
+const Sequelize = require('sequelize');
+
+const models = require('../models');
+const User = models.User;
+const Word = models.Word;
+const Room = models.Room;
+const Index = models.Index;
+
+dotenv.config();
+
+const sequelize = new Sequelize(
+    process.env.MYSQL_DATABASE,
+    process.env.MYSQL_USER,
+    process.env.MYSQL_PASSWORD,
+    {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,  // Add this line
+      dialect: 'mysql',
+      logging: false
+    }
+);
+
 
 
 // 게임 종료시 해당 방의 플레이어들의 최종 점수들을 DB에 삽입
 const endGame = async (roomId) => {
     try {
         // 점수를 데이터베이스에 업데이트
-        for(let nickname in scores[roomId]) {
-            let user = await User.findOne({ where: { nickname, room_id: roomId } });
-            if(user) {
-                user.score = scores[roomId][nickname];
-                await user.save();
-                console.log("DB에 플레이어들의 최종 점수들을 저장했습니다!");
-            }
+        if(scores[roomId] && Object.keys(scores[roomId]).length > 0) {
+            Object.keys(scores[roomId]).forEach(async (nickname) => {
+                let user = await User.findOne({ where: { nickname, room_id: roomId } });
+                if(user) {
+                    user.score = scores[roomId][nickname];
+                    await user.save();
+                    console.log("DB에 플레이어들의 최종 점수들을 저장했습니다!");
+                }
+            });
         }
         // 게임 종료 알림
         io.to(roomId).emit("endGame", { message: "게임이 종료되었습니다!" });
@@ -70,6 +93,7 @@ export default (io) => {
             playerCount[roomId]++;
             
 
+
             socket.room = roomId;
             socket.join(socket.room);
 
@@ -114,23 +138,45 @@ export default (io) => {
                 return;
             }
 
-            const usersInRoom = await User.findAll({ where: { room_id: roomId } });
-            console.log("해당 방의 플레이어 리스트: ", usersInRoom); // 모든 사용자 정보 출력
+            // console.log("Room UUID 잘 들어가 있니?:", roomId);
 
+            let usersInRoom;
+            try {
+                const room = await Room.findOne({ where: { uuid:  roomId } });
+                if(!room) {
+                    console.log('해당 UUID를 가진 Room을 찾을 수 없음');
+                    return;
+                }
+                usersInRoom = await User.findAll({ where: { room_id: room.id } });
+            } catch (error) {
+                console.error('User를 찾을 수 없음:', error);
+                return;
+            }
+            // console.log("해당 방의 플레이어 리스트: ", usersInRoom); // 모든 사용자 정보 출력
+    
             const drawUserIndex = Math.floor(Math.random() * usersInRoom.length);
-            console.log("그림 그릴 사람의 인덱스: ", drawUserIndex); // 선택된 사용자 인덱스 출력
-
-            const drawNickname = usersInRoom[drawUserIndex].nickname;
+            // console.log("그림 그릴 사람의 인덱스: ", drawUserIndex); // 선택된 사용자 인덱스 출력
+    
+            let drawNickname;
+            if(usersInRoom[drawUserIndex]) {
+                drawNickname = usersInRoom[drawUserIndex].nickname;
+            } else {
+                console.error(`User의 Index를 찾을 수 없음: ${drawUserIndex}`);
+                return;
+            }
             console.log("그림 그릴 사람: ", drawNickname); // 선택된 사용자 닉네임 출력
-
-            const selectedWord = await Word.findOne({ order: Sequelize.literal('rand()') });
+    
+            let selectedWord;
+            try {
+                selectedWord = await Word.findOne({ order: Sequelize.literal('rand()') });
+            } catch (error) {
+                console.error('Word를 찾을 수 없음:', error);
+                return;
+            }
             console.log("선택된 단어: ", selectedWord); // 선택된 단어 출력
-
+    
             gameWord[roomId] = selectedWord.word;
-            console.log("해당 방의 게임 단어: ", gameWord[roomId]); 
-
-
-            gameWord[roomId] = selectedWord.word;
+            // console.log("해당 방의 게임 단어: ", gameWord[roomId]); 
 
             roundEnded[roomId] = false;
        
@@ -141,25 +187,29 @@ export default (io) => {
 
             io.to(roomId).emit("updateScores", { scores: scores[roomId] });
 
-            io.to(roomId).sockets.forEach((socket) => {
-
-                socket.emit("announceRoundInfo", { 
-                    round: rounds[roomId], 
-                    word: socket.nickname === drawNickname ? gameWord[roomId] : null, 
-                    drawer: drawNickname 
+            if (io.sockets.adapter.rooms.get(roomId)) {
+                io.sockets.adapter.rooms.get(roomId).forEach((socketId) => {
+                    const socket = io.sockets.sockets.get(socketId);
+                    
+                    socket.emit("announceRoundInfo", { 
+                        round: rounds[roomId], 
+                        word: socket.nickname === drawNickname ? gameWord[roomId] : null, 
+                        drawer: drawNickname 
+                    });
                 });
-                console.log(`${rounds[roomId]}의 단어는 ${selectWord} 이며 그리는 사람은 ${drawNickname} 플레이어입니다!`);
+                console.log(`${rounds[roomId]}의 단어는 ${gameWord[roomId]} 이며 그리는 사람은 ${drawNickname} 플레이어입니다!`);
+            } else {
+                console.error(`RoomId: ${roomId} 가 존재하지 않거나 소켓 연결 종료 되었습니다`);
+            }
+
+                timers[roomId] = setTimeout(() => {
+                    if(io.to(roomId).sockets) {
+                        io.to(roomId).sockets.forEach((socket) => {
+                            socket.emit("endGame", { message: "시간이 끝났습니다!" });
+                        });
+                    }
+                }, limitedTime * 1000);
             });
-
-            timers[roomId] = setTimeout(() => {
-                if (roundEnded[roomId]) {
-                    return;
-                }
-
-                roundEnded[roomId] = true;
-                io.to(roomId).emit("announceResult", { gameWord: gameWord[roomId], correctUser: null, roundEnded: true });
-            }, limitedTime * 1000);
-        });
 
 
 
@@ -230,5 +280,13 @@ export default (io) => {
             }
             delete nicknames[socket.nickname];    
         });
-    });
-}
+    });  
+  };
+
+
+sequelize.authenticate().then(() => {
+    console.log('Connection has been established successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  });
