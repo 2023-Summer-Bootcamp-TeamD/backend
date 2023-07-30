@@ -9,8 +9,6 @@ services:
     volumes:
       - .:/usr/src/app
       - ./wait-for-it.sh:/usr/src/app/wait-for-it.sh
-    depends_on:
-      - db
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${MYSQL_USER}
@@ -18,14 +16,8 @@ services:
       - DB_NAME=${MYSQL_DATABASE}
       - DB_PORT=${DB_PORT}
     command: ["/usr/src/app/wait-for-it.sh", "db:3306", "--", "npm", "run", "dev"]
-  db:
-    image: mysql:8.0
-    env_file:
-      - .env
-    volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      - 3306:3306
+
+
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -37,6 +29,8 @@ services:
     depends_on:
       - node-service
       - cadvisor
+
+
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -45,21 +39,24 @@ services:
       - prometheus
     volumes:
       - ./monitoring/grafana.ini:/etc/grafana/grafana.ini
+
+
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.45.0
-    container_name: cadvisor
-    privileged: true #컨테이너를 권한 모드로 실행하여 호스트 시스템 리소스에 대한 액세스를 허용합니다. 이걸해야 오류가 안뜨더라구요
-    ports:
-      - "8081:8080"
-    devices:
-      - /dev/kmsg:/dev/kmsg
-    volumes:
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/machine-id:/etc/machine-id:ro
-      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+      image: gcr.io/cadvisor/cadvisor:v0.46.0
+      container_name: cadvisor
+      privileged: true #컨테이너를 권한 모드로 실행하여 호스트 시스템 리소스에 대한 액세스를 허용합니다. 이걸해야 오류가 안뜨더라구요
+      ports:
+        - "8081:8080"
+      devices:
+        - /dev/kmsg:/dev/kmsg
+      volumes:
+        - /var/run:/var/run:ro
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+        - /etc/machine-id:/etc/machine-id:ro
+        - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+
+
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -74,5 +71,3 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     restart: always
-volumes:
-  db-data:
