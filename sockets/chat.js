@@ -179,11 +179,6 @@ export default (io) => {
             // console.log("해당 방의 게임 단어: ", gameWord[roomId]); 
 
             roundEnded[roomId] = false;
-       
-            const startTime = Date.now();
-            const endTime = startTime + limitedTime * 1000; 
-
-            io.to(roomId).emit("startRoundTimer", { startTime: startTime, endTime: endTime });
 
             io.to(roomId).emit("updateScores", { scores: scores[roomId] });
 
@@ -201,14 +196,6 @@ export default (io) => {
             } else {
                 console.error(`RoomId: ${roomId} 가 존재하지 않거나 소켓 연결 종료 되었습니다`);
             }
-
-                timers[roomId] = setTimeout(() => {
-                    if(io.to(roomId).sockets) {
-                        io.to(roomId).sockets.forEach((socket) => {
-                            socket.emit("endGame", { message: "시간이 끝났습니다!" });
-                        });
-                    }
-                }, limitedTime * 1000);
             });
 
 
@@ -219,8 +206,6 @@ export default (io) => {
             if (msg.trim() !== "" && msg === gameWord[socket.room] && !roundEnded[socket.room]) {
                 scores[socket.room][socket.nickname]++;
                 io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname, roundEnded: true });
-
-                clearTimeout(timers[socket.room]);
             }
             io.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
