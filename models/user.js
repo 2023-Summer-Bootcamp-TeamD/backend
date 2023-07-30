@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    round_id: { type: DataTypes.INTEGER  },
     room_id: { type: DataTypes.INTEGER },
     nickname: DataTypes.STRING,
     score: { type: DataTypes.INTEGER, defaultValue: 0 },
