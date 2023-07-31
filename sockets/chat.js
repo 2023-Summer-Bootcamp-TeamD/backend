@@ -6,7 +6,6 @@ const models = require('../models');
 const User = models.User;
 const Word = models.Word;
 const Room = models.Room;
-const Index = models.Index;
 
 dotenv.config();
 
@@ -54,7 +53,8 @@ export default (io) => {
     let gameWord = {}; //각 방의 게임단어
     let rounds = {}; // 라운드 count 해주는 객체
     let roundEnded = {}; // 라운드 종료 여부 { 방: 종료여부 }
-    let timers = {}; // 타이머 
+    let chosenWords = []; // 라운드마다 선택된 단어
+    let chosenDrawers = []; // 라운드마다 그림 그리는 사람
 
     
     // 클라이언트가 소켓에 처음 연결
@@ -154,8 +154,14 @@ export default (io) => {
             }
             // console.log("해당 방의 플레이어 리스트: ", usersInRoom); // 모든 사용자 정보 출력
     
-            const drawUserIndex = Math.floor(Math.random() * usersInRoom.length);
-            // console.log("그림 그릴 사람의 인덱스: ", drawUserIndex); // 선택된 사용자 인덱스 출력
+            while(drawUserIndex === undefined){
+                const randomDrawer = Math.floor(Math.random() * usersInRoom.length);
+                if(!chosenDrawers.includes(randomDrawer)){
+                    chosenDrawers.push(randomDrawer);
+                    drawUserIndex = randomDrawer;
+                    // console.log("그림 그릴 사람의 인덱스: ", drawUserIndex); // 선택된 사용자 인덱스 출력
+                }
+            }
     
             let drawNickname;
             if(usersInRoom[drawUserIndex]) {
