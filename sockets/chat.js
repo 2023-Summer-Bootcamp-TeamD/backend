@@ -165,7 +165,7 @@ export default (io) => {
     
             let drawNickname;
             let drawUserIndex;
-            
+
             if(usersInRoom[drawUserIndex]) {
                 drawNickname = usersInRoom[drawUserIndex].nickname;
             } else {
@@ -188,6 +188,10 @@ export default (io) => {
 
             roundEnded[roomId] = false;
 
+            const startTime = Date.now();
+            const endTime = startTime + limitedTime * 1000; 
+
+            io.to(roomId).emit("startRoundTimer", { startTime: startTime, endTime: endTime });
             io.to(roomId).emit("updateScores", { scores: scores[roomId] });
 
             if (io.sockets.adapter.rooms.get(roomId)) {
