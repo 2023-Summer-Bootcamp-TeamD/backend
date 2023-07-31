@@ -176,7 +176,13 @@ export default (io) => {
     
             let selectedWord;
             try {
-                selectedWord = await Word.findOne({ order: Sequelize.literal('rand()') });
+                while(selectedWord === undefined){
+                    const randomWord = await Word.findOne({ order: Sequelize.literal('rand()') });
+                    if(!chosenWords.includes(randomWord)){
+                        chosenWords.push(randomWord);
+                        selectedWord = randomWord;
+                    }
+                }
             } catch (error) {
                 console.error('Word를 찾을 수 없음:', error);
                 return;
