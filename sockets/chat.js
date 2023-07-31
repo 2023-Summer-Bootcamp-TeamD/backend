@@ -123,7 +123,7 @@ export default (io) => {
 
 
         // 게임 매라운드 시작
-        socket.on("startRound", async ({roomId, limitedTime}) => {
+        socket.on("startRound", async ({roomId, limitedTime, category_id}) => {
         
             if(rounds[roomId]){
                 rounds[roomId]++;
@@ -177,7 +177,10 @@ export default (io) => {
             let selectedWord;
             try {
                 while(selectedWord === undefined){
-                    const randomWord = await Word.findOne({ order: Sequelize.literal('rand()') });
+                    const randomWord = await Word.findOne({ 
+                        where: {category_id: category_id},
+                        order: Sequelize.literal('rand()') });
+
                     if(!chosenWords.includes(randomWord)){
                         chosenWords.push(randomWord);
                         selectedWord = randomWord;
