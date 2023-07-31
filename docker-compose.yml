@@ -41,21 +41,21 @@ services:
       - ./monitoring/grafana.ini:/etc/grafana/grafana.ini
 
 
-cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.45.0
-    container_name: cadvisor
-    privileged: true #컨테이너를 권한 모드로 실행하여 호스트 시스템 리소스에 대한 액세스를 허용합니다. 이걸해야 오류가 안뜨더라구요
-    ports:
-      - "8081:8080"
-    devices:
-      - /dev/kmsg:/dev/kmsg
-    volumes:
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/machine-id:/etc/machine-id:ro
-      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+  cadvisor:
+      image: gcr.io/cadvisor/cadvisor:v0.45.0
+      container_name: cadvisor
+      privileged: true #컨테이너를 권한 모드로 실행하여 호스트 시스템 리소스에 대한 액세스를 허용합니다. 이걸해야 오류가 안뜨더라구요
+      ports:
+        - "8081:8080"
+      devices:
+        - /dev/kmsg:/dev/kmsg
+      volumes:
+        - /var/run:/var/run:ro
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - /etc/machine-id:/etc/machine-id:ro
+        - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
 
 
   node-exporter:
