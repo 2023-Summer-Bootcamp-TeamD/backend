@@ -1,87 +1,65 @@
 import express from 'express';
+import { Sequelize, DataTypes } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const sequelize = new Sequelize(
+    process.env.MYSQL_DATABASE,
+    process.env.MYSQL_USER,
+    process.env.MYSQL_PASSWORD,
+    {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,  
+      dialect: 'mysql',
+      logging: false
+    }
+);
+
+const Room = sequelize.define('Room', {
+  uuid: { type: DataTypes.STRING, allowNull: false },
+  category_id: { type: DataTypes.INTEGER, allowNull: false },
+  time: { type: DataTypes.INTEGER, allowNull: false },
+  player_num: { type: DataTypes.INTEGER, allowNull: false }
+});
+
+const User = sequelize.define('User', {
+  nickname: { type: DataTypes.STRING, allowNull: false },
+  score: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+  is_host: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  room_id: { type: DataTypes.INTEGER, references: { model: Room, key: 'id' } }
+});
 
 const router = express.Router();
 
-const createRouter = (db) => {
-    router.post("/api/v1/rooms", function (req, res) {
-        const { category_id, time, player_num, nickname } = req.body;
-        const uuid = uuidv4().substr(0, 5); // 앞의 5글자만 사용
-        // 트랜잭션 시작
-        db.beginTransaction(err => {
-            if (err) {
-                res.status(422).send({ error: "Database transaction could not be initiated." });
-                return;
-            }
+const createRouter = () => {
+  router.post("/api/v1/rooms", async (req, res) => {
+    const { category_id, time, player_num, nickname } = req.body;
+    const uuid = uuidv4().substr(0, 5); // 앞의 5글자만 사용
 
-            // Rooms table에 삽입
-            db.query(
-                "INSERT INTO Rooms (uuid, category_id, time, player_num) VALUES (?, ?, ?, ?)",
-                [uuid, category_id, time, player_num],
-                (err, roomResult) => {
-                    if (err) {
-                        db.rollback(() => {
-                            res.status(422).send({ error: "Error inserting room into the database.", err });
-                        });
-                        return;
-                    }
+    const t = await sequelize.transaction();
 
-                    // Room이 생성된 후, Users 테이블에 room_id와 함께 삽입
-                    db.query(
-                        "INSERT INTO Users (nickname, score, is_host, room_id) VALUES (?, 0, 1, ?)",
-                        [nickname, roomResult.insertId],
-                        (err, userResult) => {
-                            if (err) {
-                                db.rollback(() => {
-                                    res.status(422).send({ error: "Error inserting user into the database.", err });
-                                });
-                                return;
-                            }
+    try {
+      const newRoom = await Room.create({ uuid, category_id, time, player_num }, { transaction: t });
 
-                            // UUID로 생성된 방 조회
-                            db.query(
-                                `SELECT * FROM Rooms WHERE id = ?`,
-                                [roomResult.insertId],
-                                (err, roomResults) => {
-                                    if (err) {
-                                        res.status(422).send({ error: 'Database error occurred', err });
-                                    } else {
-                                        const room = { ...roomResults[0], uuid }; // 방 객체에 UUID 포함
+      const newUser = await User.create({
+        nickname,
+        score: 0,
+        is_host: true,
+        room_id: newRoom.id
+      }, { transaction: t });
 
-                                        // 생성된 사용자 조회
-                                        db.query(
-                                            `SELECT * FROM Users WHERE id = ?`,
-                                            [userResult.insertId],
-                                            (err, userResults) => {
-                                                if (err) {
-                                                    res.status(422).send({ error: 'Database error occurred', err });
-                                                } else {
-                                                    const user = userResults[0];
+      await t.commit();
 
-                                                    // 오류가 없다면 트랜잭션 커밋
-                                                    db.commit(err => {
-                                                        if (err) {
-                                                            res.status(422).send({ error: "Database transaction could not be completed.", err });
-                                                            return;
-                                                        }
+      res.status(201).send({ uuid: newRoom.uuid, score: newUser.score });
+    } catch (err) {
+      await t.rollback();
+      res.status(422).send({ error: "DB 에러 발생.", err });
+    }
+  });
 
-                                                        // 생성된 UUID, 방 정보, 사용자를 클라이언트에 전송
-                                                        res.status(201).send({ uuid: room.uuid, score: user.score });
-                                                    });
-                                                }
-                                            }
-                                        );
-                                    }
-                                }
-                            );
-                        }
-                    );
-                }
-            );
-        });
-    }); // 이 위치로 괄호 이동
-
-    return router;
+  return router;
 };
 
 export default createRouter;

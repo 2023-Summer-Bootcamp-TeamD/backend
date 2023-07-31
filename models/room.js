@@ -1,14 +1,15 @@
 'use strict';
 const { Model } = require('sequelize');
+const { v4: uuidv4 } = require('uuid');
 module.exports = (sequelize, DataTypes) => {
-  class Rooms extends Model {
+  class Room extends Model {
     static associate(models) {
-      Rooms.hasMany(models.User, { foreignKey: 'room_id' });
-      Rooms.belongsTo(models.Category, { foreignKey: 'category_id' });
-      Rooms.hasMany(models.Round, { foreignKey: 'room_id' });
+      Room.hasMany(models.User, { foreignKey: 'room_id' });
+      Room.belongsTo(models.Category, { foreignKey: 'category_id' });
+      Room.hasMany(models.Round, { foreignKey: 'room_id' });
     }
   }
-  Rooms.init(
+  Room.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -23,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       player_num: DataTypes.INTEGER,
     }, {
     sequelize,
-    modelName: 'Rooms',
+    modelName: 'Room',  // Here, change 'Rooms' to 'Room'
   });
-  return Rooms;
+  return Room;
 };
