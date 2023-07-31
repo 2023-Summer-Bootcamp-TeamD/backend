@@ -164,6 +164,8 @@ export default (io) => {
             }
     
             let drawNickname;
+            let drawUserIndex;
+            
             if(usersInRoom[drawUserIndex]) {
                 drawNickname = usersInRoom[drawUserIndex].nickname;
             } else {
