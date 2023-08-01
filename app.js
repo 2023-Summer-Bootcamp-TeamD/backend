@@ -26,9 +26,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// app.use('/', imageUpload);  // 이미지 업로드하기
+app.use('/', imageUpload);  // 이미지 업로드하기
 // app.use('/', roundStart); // 라운드별 게임 시작하기
-// app.use('/', checkRanks);  // 석차조회하기
+app.use('/', checkRanks);  // 석차조회하기
 
 dotenv.config();
 

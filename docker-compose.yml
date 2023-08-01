@@ -17,6 +17,19 @@ services:
       - DB_PORT=${DB_PORT}
     command: ["/usr/src/app/wait-for-it.sh", "db:3306", "--", "npm", "run", "dev"]
 
+  # nginx:
+  #   container_name: nginx
+  #   image: nginx:latest
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 80:80
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - node-service
+
 
   prometheus:
     image: prom/prometheus:latest
