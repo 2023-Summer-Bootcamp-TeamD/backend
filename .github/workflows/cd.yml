@@ -38,6 +38,7 @@ jobs:
             username: ${{ secrets.USERNAME }}
             key: ${{ secrets.SSH_KEY }}
             script: |
+              cd backend
               git pull
               docker-compose -f docker-compose.yml down
               docker-compose -f docker-compose.yml pull
