@@ -41,6 +41,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ubuntu/backend
+            git stash
             git pull
             docker-compose -f docker-compose.yml down
             docker-compose -f docker-compose.yml pull
