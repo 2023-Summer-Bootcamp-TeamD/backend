@@ -142,24 +142,24 @@ export default (io) => {
             }
             console.log("그림 그릴 사람: ", drawNickname); // 선택된 사용자 닉네임 출력
     
+            
             let selectedWord;
             try {
-                while(selectedWord === undefined){
-                    const randomWord = await Word.findOne({ 
-                        where: {category_id: category_id},
-                        order: Sequelize.literal('rand()') });
-
-                    if(!chosenWords.includes(randomWord)){
-                        chosenWords.push(randomWord);
-                        selectedWord = randomWord;
-                    }
-                }
+                
+                const allWords = await Word.findAll({ where: { category_id: category_id } });
+                
+                const unchosenWords = allWords.filter(word => !chosenWords.includes(word.id));
+                
+                const randomIndex = Math.floor(Math.random() * unchosenWords.length);
+                selectedWord = unchosenWords[randomIndex];
+                
+                chosenWords.push(selectedWord.id);
             } catch (error) {
                 console.error('Word를 찾을 수 없음:', error);
                 return;
             }
-            console.log("선택된 단어: ", selectedWord); // 선택된 단어 출력
-    
+            
+            console.log("선택된 단어: ", selectedWord);
             gameWord[roomId] = selectedWord.word;
             // console.log("해당 방의 게임 단어: ", gameWord[roomId]); 
 
@@ -230,7 +230,7 @@ export default (io) => {
 
         
         socket.on("endGame", async (roomId) => {
-            console.log("게임데이터 초기화완료");
+            console.log("게임데이터 초기화시작");
             try {
                 // 클라이언트에게 게임 종료 알림
                 socket.broadcast.to(roomId).emit("endGame", { message: "게임이 종료되었습니다!" });
@@ -242,6 +242,7 @@ export default (io) => {
                 delete roundEnded[roomId];
                 chosenWords = [];
                 chosenDrawers = [];
+                console.log("게임데이터 초기화완료");
             } catch(error) {
                 console.error("게임데이터가 초기화 no");
             }
