@@ -65,7 +65,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 
-router.post('/api/v1/rooms/:uuid/picture/:word_id/rounds', upload.single('image'), (req, res) => {
+router.post('/api/v1/rooms/:uuid/words/:word_id/rounds', upload.single('image'), (req, res) => {
   
   const file = req.file;
   const fileContent = file.buffer;
