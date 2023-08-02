@@ -7,11 +7,16 @@ on:
       types:
         - closed
       branches: [develop, main]
+  workflow_run:
+    workflows: ["Node.js CI"]
+    types:
+      - completed
 
 jobs:
-  cd:
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
