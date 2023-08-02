@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Pingo Bingo API 
+  title: Pingo Bingo API
   description: API description
 servers:
   - url: http://localhost:8080
@@ -12,7 +12,7 @@ paths:
     post:
       tags:
         - Backend endpoints
-      summary: 사용자 방만들기 API 
+      summary: 사용자 방만들기 API
       requestBody:
         content:
           application/json:
@@ -50,7 +50,7 @@ paths:
     post:
       tags:
         - Backend endpoints
-      summary: 사용자 입장하기 API 
+      summary: 사용자 입장하기 API
       parameters:
         - in: path
           name: UUID
@@ -80,16 +80,16 @@ paths:
                     type: integer
         422:
           description: Validation error
-  /api/v1/rooms/{room_id}/game/rounds:
+  /api/v1/rooms/{room_id}/game/rounds:  # New path for the roundStart.js API
     get:
       tags:
         - Backend endpoints
-      summary: 라운드 별 게임 시작 API 
+      summary: 라운드 별 게임 시작 API
       parameters:
         - in: path
           name: room_id
           schema:
-            type: integer
+            type: string
           required: true
           description: Unique ID of the room
       responses:
@@ -101,7 +101,7 @@ paths:
                 type: object
                 properties:
                   room_id:
-                    type: integer
+                    type: string
                   time:
                     type: integer
                   word:
@@ -109,20 +109,25 @@ paths:
                   nickname:
                     type: string
         500:
-          description: Server error
-  /api/v1/rooms/{room_id}/picture/rounds:
+          description: Internal server error
+  /api/v1/rooms/{uuid}/words/{word_id}/rounds:
     post:
       tags:
         - Backend endpoints
-      summary: 게임 라운드별 그림 저장 API
-      description: 매 라운드마다 출제자가 그린 그림을 S3에 저장한다.
+      summary: 게임 라운드별 그림 저장 API - 매 라운드마다 출제자가 그린 그림을 S3에 저장한다.
       parameters:
         - in: path
-          name: room_id
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: Unique ID of the room
+        - in: path
+          name: word_id
           schema:
             type: integer
           required: true
-          description: Unique ID of the room
+          description: ID of the word for the current round
       requestBody:
         content:
           multipart/form-data:
@@ -136,7 +141,7 @@ paths:
                 - image
       responses:
         201:
-          description: Image successfully uploaded
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -144,6 +149,77 @@ paths:
                 properties:
                   location:
                     type: string
-                    description: The URL of the uploaded image in S3
         500:
-          description: Failed to upload image to S3
+          description: Internal server error
+  /api/v1/results/{room_id}:
+    get:
+      tags:
+        - Backend endpoints
+      summary: 석차 조회 API
+      parameters:
+        - in: path
+          name: room_id
+          schema:
+            type: string
+          required: true
+          description: Unique ID of the room
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  석차:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        nickname:
+                          type: string
+                        score:
+                          type: integer
+        422:
+          description: Validation error
+  /api/v1/results/categories/{category_id}/words:
+    get:
+      tags:
+        - Backend endpoints
+      summary: 카테고리별 단어와 그림 URL 조회 API
+      parameters:
+        - in: path
+          name: category_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the category
+        - in: query
+          name: word
+          schema:
+            type: string
+          required: false
+          description: Filter words by a specific word
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    category_id:
+                      type: integer
+                    word:
+                      type: string
+                    Round:
+                      type: object
+                      properties:
+                        picture_url:
+                          type: string
+        500:
+          description: Internal server error
