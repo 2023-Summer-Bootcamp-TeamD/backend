@@ -178,6 +178,7 @@ export default (io) => {
                     socket.emit("announceRoundInfo", { 
                         round: rounds[roomId], 
                         word: socket.nickname === drawNickname ? gameWord[roomId] : null, 
+                        word_id: socket.nickname === drawNickname ? selectedWord.id : null,
                         drawer: drawNickname 
                     });
                 });
