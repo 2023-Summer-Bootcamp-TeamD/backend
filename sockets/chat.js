@@ -169,7 +169,6 @@ export default (io) => {
             const endTime = startTime + limitedTime * 1000; 
 
             io.to(roomId).emit("startRoundTimer", { startTime: startTime, endTime: endTime });
-            io.to(roomId).emit("updateScores", { scores: scores[roomId] });
 
             if (io.sockets.adapter.rooms.get(roomId)) {
                 io.sockets.adapter.rooms.get(roomId).forEach((socketId) => {
@@ -196,6 +195,7 @@ export default (io) => {
             if (msg.trim() !== "" && msg === gameWord[socket.room] && !roundEnded[socket.room]) {
                 scores[socket.room][socket.nickname]++;
                 io.to(socket.room).emit("announceResult", { gameWord: gameWord[socket.room], correctUser: socket.nickname, roundEnded: true });
+                io.to(socket.room).emit("updateScores", { scores: scores[socket.room] });
             }
             io.to(socket.room).emit("updateChat", { nickname: socket.nickname, message: msg });
         });
