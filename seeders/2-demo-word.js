@@ -35,7 +35,7 @@ module.exports = {
       {category_id: 3, word: "루나", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 3, word: "샘", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 3, word: "아이언맨", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
-      {category_id: 3, word: "아바타(나비족)", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
+      {category_id: 3, word: "아바타", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 3, word: "마동석", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 3, word: "이병헌", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
 
@@ -68,7 +68,7 @@ module.exports = {
       {category_id: 4, word: "루나", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 4, word: "샘", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 4, word: "아이언맨", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
-      {category_id: 4, word: "아바타(나비족)", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
+      {category_id: 4, word: "아바타", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 4, word: "마동석", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
       {category_id: 4, word: "이병헌", createdAt: new Date(), updatedAt: new Date(), is_deleted: null},
     ], {});
