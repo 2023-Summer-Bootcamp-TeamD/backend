@@ -22,30 +22,6 @@ const sequelize = new Sequelize(
 );
 
 
-
-// 게임 종료시 해당 방의 플레이어들의 최종 점수들을 DB에 삽입
-const endGame = async (roomId) => {
-    try {
-        // 점수를 데이터베이스에 업데이트
-        if(scores[roomId] && Object.keys(scores[roomId]).length > 0) {
-            Object.keys(scores[roomId]).forEach(async (nickname) => {
-                let user = await User.findOne({ where: { nickname, room_id: roomId } });
-                if(user) {
-                    user.score = scores[roomId][nickname];
-                    await user.save();
-                    console.log("DB에 플레이어들의 최종 점수들을 저장했습니다!");
-                }
-            });
-        }
-        // 게임 종료 알림
-        io.to(roomId).emit("endGame", { message: "게임이 종료되었습니다!" });
-    } catch(error) {
-        console.error(error);
-    }
-};
-
-
-
 export default (io) => {
     let playerCount = {}; // 방의 참여인원 count 해주는 객체
     let nicknames = {}; // 플레이어 닉네임 중복 체크
@@ -132,14 +108,6 @@ export default (io) => {
             }
             console.log(`${rounds[roomId]} 라운드가 시작되었습니다!`);
 
-            if(rounds[roomId] > playerCount[roomId]){
-                endGame(roomId);
-                
-                return;
-            }
-
-            // console.log("Room UUID 잘 들어가 있니?:", roomId);
-
             let usersInRoom;
             try {
                 const room = await Room.findOne({ where: { uuid:  roomId } });
@@ -174,30 +142,30 @@ export default (io) => {
             }
             console.log("그림 그릴 사람: ", drawNickname); // 선택된 사용자 닉네임 출력
     
+            
             let selectedWord;
             try {
-                while(selectedWord === undefined){
-                    const randomWord = await Word.findOne({ 
-                        where: {category_id: category_id},
-                        order: Sequelize.literal('rand()') });
-
-                    if(!chosenWords.includes(randomWord)){
-                        chosenWords.push(randomWord);
-                        selectedWord = randomWord;
-                    }
-                }
+                
+                const allWords = await Word.findAll({ where: { category_id: category_id } });
+                
+                const unchosenWords = allWords.filter(word => !chosenWords.includes(word.id));
+                
+                const randomIndex = Math.floor(Math.random() * unchosenWords.length);
+                selectedWord = unchosenWords[randomIndex];
+                
+                chosenWords.push(selectedWord.id);
             } catch (error) {
                 console.error('Word를 찾을 수 없음:', error);
                 return;
             }
-            console.log("선택된 단어: ", selectedWord); // 선택된 단어 출력
-    
+            
+            console.log("선택된 단어: ", selectedWord);
             gameWord[roomId] = selectedWord.word;
             // console.log("해당 방의 게임 단어: ", gameWord[roomId]); 
 
             roundEnded[roomId] = false;
 
-            const startTime = Date.now();
+            const startTime = Date.now(); 
             const endTime = startTime + limitedTime * 1000; 
 
             io.to(roomId).emit("startRoundTimer", { startTime: startTime, endTime: endTime });
@@ -210,6 +178,7 @@ export default (io) => {
                     socket.emit("announceRoundInfo", { 
                         round: rounds[roomId], 
                         word: socket.nickname === drawNickname ? gameWord[roomId] : null, 
+                        word_id: socket.nickname === drawNickname ? selectedWord.id : null,
                         drawer: drawNickname 
                     });
                 });
@@ -259,6 +228,25 @@ export default (io) => {
             socket.broadcast.to(roomId).emit("canvasEraseAll");
         });
 
+        
+        socket.on("endGame", async (roomId) => {
+            console.log("게임데이터 초기화시작");
+            try {
+                // 클라이언트에게 게임 종료 알림
+                socket.broadcast.to(roomId).emit("endGame", { message: "게임이 종료되었습니다!" });
+                // 게임 데이터 초기화
+                delete scores[roomId];
+                delete playerCount[roomId];
+                delete gameWord[roomId];
+                delete rounds[roomId];
+                delete roundEnded[roomId];
+                chosenWords = [];
+                chosenDrawers = [];
+                console.log("게임데이터 초기화완료");
+            } catch(error) {
+                console.error("게임데이터가 초기화 no");
+            }
+        });
 
 
         // 클라이언트 연결 종료
